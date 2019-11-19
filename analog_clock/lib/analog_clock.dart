@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -98,18 +99,18 @@ class _AnalogClockState extends State<AnalogClock> {
     final customTheme = Theme.of(context).brightness == Brightness.light
         ? Theme.of(context).copyWith(
             // Hour hand.
-            primaryColor: Color(0xFF4285F4),
-            // Minute hand.
-            highlightColor: Color(0xFF8AB4F8),
+            primaryColor: Colors.black,
             // Second hand.
-            accentColor: Color(0xFF669DF6),
-            backgroundColor: Color(0xFFD2E3FC),
+            highlightColor: Colors.red,
+            // Minute hand.
+            accentColor: Colors.black,
+            backgroundColor: Colors.white,
           )
         : Theme.of(context).copyWith(
-            primaryColor: Color(0xFFD2E3FC),
-            highlightColor: Color(0xFF4285F4),
-            accentColor: Color(0xFF8AB4F8),
-            backgroundColor: Color(0xFF3C4043),
+            primaryColor: Colors.white,
+            highlightColor: Colors.red,
+            accentColor: Colors.white,
+            backgroundColor: Colors.black,
           );
 
     final time = DateFormat.Hms().format(DateTime.now());
@@ -126,29 +127,74 @@ class _AnalogClockState extends State<AnalogClock> {
       ),
     );
 
+    //final double fontSize = 30;
+    final double topSize = 8;
+
+    final double mainThick = 1.5;
+    Container mainLines = Container(
+      child: Stack(
+        children: <Widget>[
+          for(int i=0;i<=11;i++)
+            DrawnHand(
+              color: customTheme.accentColor,
+              thickness: mainThick,
+              size: 1,
+              angleRadians: i*5 * radiansPerTick,
+            ),
+
+          Container(
+            margin: EdgeInsets.all(12.5),
+            decoration: BoxDecoration(
+                color: customTheme.backgroundColor,
+                shape: BoxShape.circle
+            ),
+          ),
+
+        ],
+      ),
+    );
+
+    final double subThick = 1;
+    Container subLines = Container(
+      child: Stack(
+        children: <Widget>[
+          for(int i=0;i<=59;i++)
+            DrawnHand(
+              color: customTheme.accentColor,
+              thickness: subThick,
+              size: 1,
+              angleRadians: i * radiansPerTick,
+            ),
+
+          Container(
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: customTheme.backgroundColor,
+                shape: BoxShape.circle
+            ),
+          ),
+
+        ],
+      ),
+    );
+
     return Semantics.fromProperties(
       properties: SemanticsProperties(
         label: 'Analog clock with time $time',
         value: time,
       ),
       child: Container(
-        color: customTheme.backgroundColor,
+        padding: EdgeInsets.all(1),
+        decoration: BoxDecoration(
+          color: customTheme.backgroundColor,
+          shape: BoxShape.circle,
+          border: Border.all(width: 0.5,color: customTheme.primaryColor)
+        ),
         child: Stack(
+          alignment: Alignment.center,
           children: [
-            // Example of a hand drawn with [CustomPainter].
-            DrawnHand(
-              color: customTheme.accentColor,
-              thickness: 4,
-              size: 1,
-              angleRadians: _now.second * radiansPerTick,
-            ),
-            DrawnHand(
-              color: customTheme.highlightColor,
-              thickness: 16,
-              size: 0.9,
-              angleRadians: _now.minute * radiansPerTick,
-            ),
-            // Example of a hand drawn with [Container].
+            subLines,
+            mainLines,
             ContainerHand(
               color: Colors.transparent,
               size: 0.5,
@@ -157,11 +203,35 @@ class _AnalogClockState extends State<AnalogClock> {
               child: Transform.translate(
                 offset: Offset(0.0, -60.0),
                 child: Container(
-                  width: 32,
-                  height: 150,
+                  width: 5,
+                  height: 120,
                   decoration: BoxDecoration(
                     color: customTheme.primaryColor,
                   ),
+                ),
+              ),
+            ),
+            // Example of a hand drawn with [CustomPainter].
+            DrawnHand(
+              color: customTheme.accentColor,
+              thickness: 2,
+              size: 0.75,
+              angleRadians: _now.minute * radiansPerTick,
+            ),
+            DrawnHand(
+              color: customTheme.highlightColor,
+              thickness: 1.5,
+              size: 0.85,
+              angleRadians: _now.second * radiansPerTick,
+            ),
+            Center(
+              child: Container(
+                width: topSize,
+                height: topSize,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(width: 1.5,color: customTheme.highlightColor),
+                  shape: BoxShape.circle,
                 ),
               ),
             ),
